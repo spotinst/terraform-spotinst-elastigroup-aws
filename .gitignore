@@ -1,0 +1,18 @@
+# terraform
+.terraform
+*.tfstate*
+terraform.tfstate
+
+# macOS
+.DS_Store
+
+# vim
+*~
+*.swp
+
+# jetbrains
+.idea
+
+# misc
+.envrc
+*.json
