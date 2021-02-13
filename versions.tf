@@ -1,7 +1,10 @@
 terraform {
-  required_version = ">= 0.12.20"
+  required_version = ">= 0.12.26"
 
   required_providers {
-    spotinst = ">= 1.27.0"
+    spotinst = {
+      source  = "spotinst/spotinst"
+      version = ">= 1.27.0"
+    }
   }
 }

@@ -56,7 +56,7 @@ This module creates and manages the following resources:
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.20 |
+| terraform | >= 0.12.26 |
 | spotinst | >= 1.27.0 |
 
 ## Providers
