@@ -164,6 +164,11 @@ variable "spot_percentage" {
   default     = 100
   description = "The percentage of Spot instances that would spin up from the desired_capacity number."
 }
+variable "immediate_od_recover_threshold" {
+  type        = number
+  default     = null
+  description = ""
+}
 variable "draining_timeout" {
   type        = number
   default     = 120
