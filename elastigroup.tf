@@ -57,6 +57,7 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   utilize_reserved_instances    = var.utilize_reserved_instances
   minimum_instance_lifetime     = var.minimum_instance_lifetime
   immediate_od_recover_threshold = var.immediate_od_recover_threshold
+
   dynamic "scaling_strategy" {
     for_each = (var.terminate_at_end_of_billing_hour != null || var.termination_policy != null) ? [1] :[]
     content {
