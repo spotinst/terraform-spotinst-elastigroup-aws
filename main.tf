@@ -26,6 +26,7 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
     content {
       http_tokens                 = var.http_tokens
       http_put_response_hop_limit = var.http_put_response_hop_limit
+      instance_metadata_tags      = var.instance_metadata_tags
     }
   }
 
@@ -37,8 +38,9 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   }
 
   instance_types_ondemand       = var.instance_types_ondemand
-  instance_types_spot           = var.instance_types_spot
+  instance_types_spot           = var.instance_types_spot != "" ? var.instance_types_spot : null
   instance_types_preferred_spot = var.instance_types_preferred_spot
+  on_demand_types = var.instance_types_ondemand_types
 
   dynamic "instance_types_weights" {
     for_each = var.instance_types_weights != null ? [var.instance_types_weights] : []
@@ -55,7 +57,13 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   spot_percentage               = var.spot_percentage
   draining_timeout              = var.draining_timeout
   utilize_reserved_instances    = var.utilize_reserved_instances
+  utilize_commitments           = var.utilize_commitments
+  ondemand_count                = var.ondemand_count
+  consider_od_pricing           = var.consider_od_pricing
   minimum_instance_lifetime     = var.minimum_instance_lifetime
+  immediate_od_recover_threshold = var.immediate_od_recover_threshold
+  auto_healing                   = var.auto_healing
+  restrict_single_az             = var.restrict_single_az
 
   dynamic "scaling_strategy" {
     for_each = (var.terminate_at_end_of_billing_hour != null || var.termination_policy != null) ? [1] :[]
@@ -100,14 +108,6 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   elastic_load_balancers  = var.elastic_load_balancers
   target_group_arns       = var.target_group_arns
 
-  dynamic "multai_target_sets" {
-    for_each = var.multai_target_sets != null ? [var.multai_target_sets] : []
-    content {
-      balancer_id   = multai_target_sets.value.balancer_id
-      target_set_id = multai_target_sets.value.target_set_id
-    }
-  }
-
   dynamic "signal" {
     for_each = var.signal != null ? [var.signal] : []
     content {
@@ -138,7 +138,7 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   }
 
   dynamic "scaling_up_policy" {
-    for_each = var.scaling_up_policy != null ? [var.scaling_up_policy] : []
+    for_each = var.scaling_up_policy != null ? var.scaling_up_policy : []
     content {
       policy_name         = scaling_up_policy.value.policy_name
       metric_name         = scaling_up_policy.value.metric_name
@@ -160,34 +160,18 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
           value           = dimensions.value.value
         }
       }
-      #      dynamic "step_adjustment" {
-      #        for_each          = ( var.scaling_up_step_adjustment != null &&
-      #                              scaling_up_policy.value.threshold == null &&
-      #                              scaling_up_policy.value.action_type == null) ? [var.scaling_up_step_adjustment] : []
-      #        content {
-      #          threshold             = step_adjustment.value.threshold
-      #          action {
-      #            type                = step_adjustment.value.type
-      #            adjustment          = step_adjustment.value.adjustment
-      #            maximim             = step_adjustment.value.maximim
-      #            minimum             = step_adjustment.value.minimum
-      #            min_target_capacity = step_adjustment.value.min_target_capacity
-      #            target              = step_adjustment.value.target
-      #          }
-      #        }
-      #      }
       adjustment                = scaling_up_policy.value.adjustment
       min_target_capacity       = scaling_up_policy.value.min_target_capacity
       max_target_capacity       = scaling_up_policy.value.max_target_capacity
       minimum                   = scaling_up_policy.value.minimum
-      maximum                   = scaling_up_policy.value.maxium
+      maximum                   = scaling_up_policy.value.maximum
       target                    = scaling_up_policy.value.target
     }
   }
 
 
   dynamic "scaling_down_policy" {
-    for_each = var.scaling_down_policy != null ? [var.scaling_down_policy] : []
+    for_each = var.scaling_down_policy != null ? var.scaling_down_policy : []
     content {
       policy_name         = scaling_down_policy.value.policy_name
       metric_name         = scaling_down_policy.value.metric_name
@@ -209,33 +193,91 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
           value           = dimensions.value.value
         }
       }
-      #      dynamic "step_adjustment" {
-      #        for_each          = ( var.scaling_down_step_adjustment != null &&
-      #                              scaling_down_policy.value.threshold == null &&
-      #                              scaling_down_policy.value.action_type == null) ? [var.scaling_down_step_adjustment] : []
-      #        content {
-      #          threshold             = scaling_down_policy.value.threshold
-      #          action {
-      #            adjustment          = scaling_down_policy.value.adjustment
-      #            maximim             = scaling_down_policy.value.maximim
-      #            minimum             = scaling_down_policy.value.minimum
-      #            min_target_capacity = scaling_down_policy.value.min_target_capacity
-      #            target              = scaling_down_policy.value.target
-      #          }
-      #        }
-      #      }
       adjustment                = scaling_down_policy.value.adjustment
       min_target_capacity       = scaling_down_policy.value.min_target_capacity
       max_target_capacity       = scaling_down_policy.value.max_target_capacity
       minimum                   = scaling_down_policy.value.minimum
-      maximum                   = scaling_down_policy.value.maxium
+      maximum                   = scaling_down_policy.value.maximum
       target                    = scaling_down_policy.value.target
     }
   }
 
-  lifecycle {
+  dynamic "resource_requirements" {
+      for_each = var.resource_requirements != null ? [var.resource_requirements] : []
+      content {
+    excluded_instance_families      = resource_requirements.value.excluded_instance_families
+    excluded_instance_generations   = resource_requirements.value.excluded_instance_generations
+    excluded_instance_types         = resource_requirements.value.excluded_instance_types
+    required_gpu_minimum            = resource_requirements.value.required_gpu_minimum
+    required_gpu_maximum            = resource_requirements.value.required_gpu_maximum
+    required_memory_minimum         = resource_requirements.value.required_memory_minimum
+    required_memory_maximum         = resource_requirements.value.required_memory_maximum
+    required_vcpu_minimum           = resource_requirements.value.required_vcpu_minimum
+    required_vcpu_maximum           = resource_requirements.value.required_vcpu_maximum
+  }
+  }
+
+  dynamic "images" {
+      for_each = var.images == null ? [] : var.images
+      content {
+      dynamic "image" {
+          for_each = images.value.image
+          content {
+            id              = image.value.id
+          }
+      }
+    }
+  }
+  ## Block Device Mappings ##
+    dynamic "ebs_block_device" {
+      for_each = var.ebs_block_device != null ? var.ebs_block_device : []
+      content {
+        device_name = ebs_block_device.value.device_name
+          delete_on_termination = try(ebs_block_device.value.delete_on_termination,null)
+          encrypted             = try(ebs_block_device.value.encrypted,null)
+          iops                  = try(ebs_block_device.value.iops,null)
+          kms_key_id            = try(ebs_block_device.value.kms_key_id,null)
+          snapshot_id           = try(ebs_block_device.value.snapshot_id,null)
+          volume_type           = try(ebs_block_device.value.volume_type,null)
+          volume_size           = try(ebs_block_device.value.volume_size,null)
+          throughput            = try(ebs_block_device.value.throughput,null)
+          dynamic "dynamic_volume_size" {
+            for_each = ebs_block_device.value.dynamic_volume_size
+            content {
+              base_size              = dynamic_volume_size.value.base_size
+              resource               = dynamic_volume_size.value.resource
+              size_per_resource_unit = dynamic_volume_size.value.size_per_resource_unit
+            }
+          }
+          dynamic "dynamic_iops" {
+            for_each = ebs_block_device.value.dynamic_iops
+            content {
+              base_size              = dynamic_iops.value.base_size
+              resource               = dynamic_iops.value.resource
+              size_per_resource_unit = dynamic_iops.value.size_per_resource_unit
+            }
+          }
+      }
+    }
+
+    dynamic "integration_codedeploy" {
+        for_each = var.integration_codedeploy != null ? [var.integration_codedeploy] : []
+        content {
+            cleanup_on_failure = integration_codedeploy.value.cleanup_on_failure
+            terminate_instance_on_failure = integration_codedeploy.value.terminate_instance_on_failure
+            dynamic "deployment_groups" {
+                for_each = integration_codedeploy.value.deployment_groups
+                content {
+                     application_name = deployment_groups.value.application_name
+                     deployment_group_name = deployment_groups.value.deployment_group_name
+                }
+            }
+        }
+    }
+
+  /* lifecycle {
     ignore_changes = [
       desired_capacity
     ]
-  }
+  } */
 }

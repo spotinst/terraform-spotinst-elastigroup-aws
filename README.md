@@ -20,7 +20,7 @@ A Terraform module to create a Spot Elastigroup in AWS.
 
 ```hcl
 module "elastigroup-aws" {
-  source = "github.com/spotinst/terraform-spotinst-elastigroup-aws"
+  source = "spotinst/elastigroup-aws/spotinst"
 
   # Configuration.
   name                    = "terraform_test"
@@ -47,15 +47,15 @@ This module creates and manages the following resources:
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
+| Name | Version  |
+|------|----------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.4.6 |
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_spotinst"></a> [spotinst](#provider\_spotinst) | >= 1.78.0 |
+| Name | Version    |
+|------|------------|
+| <a name="provider_spotinst"></a> [spotinst](#provider\_spotinst) | >= 1.188.0 |
 
 ## Resources
 
