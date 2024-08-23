@@ -102,6 +102,11 @@ variable "http_put_response_hop_limit" {
   default     = null
   description = "Default: 1. The desired HTTP PUT response hop limit for instance metadata requests. The larger the number, the further instance metadata requests can travel. Valid values: Integers from 1 to 64."
 }
+variable "instance_metadata_tags" {
+  type        = string
+  default     = "disabled"
+  description = "Indicates whether access to instance tags from the instance metadata is enabled or disabled. Can’t be null."
+}
 
 ## cpu_options ##
 variable "threads_per_core" {
@@ -117,12 +122,19 @@ variable "instance_types_ondemand" {
 }
 variable "instance_types_spot" {
   type        = list(string)
+  default     = null
   description = "One or more instance types."
 }
 variable "instance_types_preferred_spot" {
   type        = list(string)
   default     = null
   description = "Prioritize a subset of spot instance types. Must be a subset of the selected spot instance types."
+}
+
+variable "instance_types_ondemand_types" {
+  type        = list(string)
+  default     = null
+  description = "Available on demand instance types. Note: Either ondemand or onDemandTypes must be defined, but not both."
 }
 
 variable "instance_types_weights" {
@@ -167,12 +179,37 @@ variable "spot_percentage" {
 variable "draining_timeout" {
   type        = number
   default     = 120
-  description = " The time in seconds, the instance is allowed to run while detached from the ELB. This is to allow the instance time to be drained from incoming TCP connections before terminating it, during a scale down operation."
+  description = "The time in seconds, the instance is allowed to run while detached from the ELB. This is to allow the instance time to be drained from incoming TCP connections before terminating it, during a scale down operation."
+}
+variable "immediate_od_recover_threshold" {
+  type        = number
+  default     = null
+  description = ""
 }
 variable "utilize_reserved_instances" {
   type        = bool
   default     = true
   description = "In a case of any available reserved instances, Elastigroup will utilize them first before purchasing Spot instances."
+}
+variable "utilize_commitments" {
+  type        = bool
+  default     = true
+  description = "If there are available Reserved Instances or Savings Plans, Elastigroup will utilize them before using Spot instances."
+}
+variable "ondemand_count" {
+  type        = number
+  default     = null
+  description = "Minimum number of instances that will always be on-demand."
+}
+variable "consider_od_pricing" {
+  type        = bool
+  default     = false
+  description = "When the value is set to true, Elastigroup will prioritize launching On-Demand instances if they are found to be more cost-effective than available Spot markets."
+}
+variable "restrict_single_az" {
+  type          = bool
+  default       = false
+  description   = "Elastigroup will automatically scale your instances in the most available and cost efficient availability zone."
 }
 variable "minimum_instance_lifetime" {
   type        = number
@@ -200,13 +237,18 @@ variable "health_check_type" {
 }
 variable "health_check_grace_period" {
   type        = number
-  default     = null
+  default     = 300
   description = "The amount of time, in seconds, after the instance has launched to starts and check its health."
 }
 variable "health_check_unhealthy_duration_before_replacement" {
   type        = number
   default     = null
   description = "The amount of time, in seconds, that we will wait before replacing an instance that is running and became unhealthy (this is only applicable for instances that were once healthy)."
+}
+variable "auto_healing" {
+  type  =  bool
+  default = true
+  description = "Auto-healing replacement won't be triggered if this parameter value is `false`"
 }
 ##########
 
@@ -229,6 +271,7 @@ variable "revert_to_spot" {
   description     = "Hold settings for strategy correction – replacing On-Demand for Spot instances."
 }
 
+# resourceTagSpecification
 variable "should_tag_enis" {
   type        = string
   default     = null
@@ -259,14 +302,7 @@ variable "target_group_arns" {
   default         = null
   description     = "The group name."
 }
-variable "multai_target_sets" {
-  type            = list(object({
-    target_set_id = string
-    balancer_id   = string
-  }))
-  default         = null
-  description     = "Set of targets to register."
-}
+
 variable "signal" {
   type        = list(object({
     name      = string
@@ -300,21 +336,27 @@ variable "scheduled_task" {
 
 variable "scaling_up_policy" {
   type = list(object({
-    policy_name           = string
-    metric_name           = string
-    statistic             = string
-    unit                  = string
-    threshold             = number
-    action_type           = number
-    namespace             = number
-    is_enabled            = bool
-    period                = number
-    evaluuation_periods   = number
-    cooldown              = number
-    operator              = number
-    source                = number
+    policy_name           = optional(string,null)
+    metric_name           = optional(string,null)
+    statistic             = optional(string,null)
+    unit                  = optional(string,null)
+    threshold             = optional(number,null)
+    action_type           = optional(string,null)
+    namespace             = optional(string,null)
+    is_enabled            = optional(bool,null)
+    period                = optional(number,null)
+    evaluation_periods    = optional(number,null)
+    cooldown              = optional(number,null)
+    operator              = optional(string,null)
+    source                = optional(string,null)
+    adjustment            = optional(number,null)
+    maximum               = optional(number,null)
+    minimum               = optional(number,null)
+    min_target_capacity   = optional(number,null)
+    max_target_capacity   = optional(number,null)
+    target                = optional(number,null)
   }))
-  default                 = null
+  default                 = []
   description             = "scaling_up object"
 }
 variable "scaling_up_dimensions" {
@@ -329,9 +371,10 @@ variable "scaling_up_step_adjustment" {
   type     = list(object({
     type                = string
     adjustment          = number
-    maximim             = number
+    maximum             = number
     minimum             = number
     min_target_capacity = number
+    max_target_capacity = number
     target              = number
     threshold           = number
   }))
@@ -341,21 +384,27 @@ variable "scaling_up_step_adjustment" {
 
 variable "scaling_down_policy" {
   type = list(object({
-    policy_name           = string
-    metric_name           = string
-    statistic             = string
-    unit                  = string
-    threshold             = number
-    action_type           = number
-    namespace             = number
-    is_enabled            = bool
-    period                = number
-    evaluuation_periods   = number
-    cooldown              = number
-    operator              = number
-    source                = number
-  }))
-  default                 = null
+      policy_name           = optional(string,null)
+      metric_name           = optional(string,null)
+      statistic             = optional(string,null)
+      unit                  = optional(string,null)
+      threshold             = optional(number,null)
+      action_type           = optional(string,null)
+      namespace             = optional(string,null)
+      is_enabled            = optional(bool,null)
+      period                = optional(number,null)
+      evaluation_periods    = optional(number,null)
+      cooldown              = optional(number,null)
+      operator              = optional(string,null)
+      source                = optional(string,null)
+      adjustment            = optional(number,null)
+      maximum               = optional(number,null)
+      minimum               = optional(number,null)
+      min_target_capacity   = optional(number,null)
+      max_target_capacity   = optional(number,null)
+      target                = optional(number,null)
+    }))
+    default                 = []
   description             = "scaling_down object"
 }
 
@@ -372,7 +421,7 @@ variable "scaling_down_step_adjustment" {
   type = list(object({
     type                = string
     adjustment          = number
-    maximim             = number
+    maximum             = number
     minimum             = number
     min_target_capacity = number
     target              = number
@@ -388,7 +437,7 @@ variable "scaling_target_policy" {
     metric_name           = string
     statistic             = string
     unit                  = string
-    namespace             = number
+    namespace             = string
     cooldown              = number
     source                = string
     dimensions            = list(object({
@@ -437,21 +486,31 @@ variable "network_interface" {
   default = null
   description = "scaling_target_policy object"
 }
-
-variable "block_device_mappings" {
-  type 								= list(object({
-    device_name						= string
-    snapshot_id 					= string
-    volume_type 					= string
-    volume_size						= number
-    iops							= number
-    delete_on_termination 			= bool
-    encrypted 						= bool
-    kms_key_id 						= string
-    throughput						= number
+##Block Device Mappings
+variable "ebs_block_device" {
+  type        = list(object({
+      device_name = optional(string,null)
+      delete_on_termination = optional(bool,null)
+      encrypted = optional(bool,null)
+      iops = optional(number,null)
+      kms_key_id = optional(string,null)
+      snapshot_id = optional(string,null)
+      throughput = optional(number,null)
+      volume_size = optional(number,null)
+      volume_type = optional(string,null)
+      dynamic_iops = optional(set(object({
+          base_size = optional(number,null)
+          resource = optional(string,null)
+          size_per_resource_unit = optional(number,null)
+      })), [])
+      dynamic_volume_size = optional(set(object({
+          base_size = optional(number,null)
+          resource = optional(string,null)
+          size_per_resource_unit = optional(number,null)
+      })), [])
   }))
-  default 							= null
-  description 						= "Block Device Mapping Object"
+  default     = []
+  description = "Block Device Mapping Object"
 }
 
 variable "ephemeral_block_device" {
@@ -557,11 +616,11 @@ variable "integration_ecs" {
 ## integration_codedeploy ##
 variable "integration_codedeploy" {
   type 			                    = object({
-    cleanup_on_failure              = string
-    terminate_instance_on_failure	= string
+    cleanup_on_failure              = optional(bool,null)
+    terminate_instance_on_failure	= optional(bool,null)
     deployment_groups               = list(object({
-      application_name              = string
-      deployment_group_name         = string
+      application_name              = optional(string,null)
+      deployment_group_name         = optional(string,null)
     }))
   })
   default 		                    = null
@@ -631,4 +690,31 @@ variable "update_strategy" {
   })
   default                               = null
   description                           = "The update strategy object."
+}
+
+variable "resource_requirements" {
+    type = object({
+        excluded_instance_families = optional(list(string),null)
+        excluded_instance_generations = optional(list(string),null)
+        excluded_instance_types = optional(list(string),null)
+        required_gpu_minimum = optional(number,null)
+        required_gpu_maximum = optional(number,null)
+        required_memory_minimum = optional(number,null)
+        required_memory_maximum = optional(number,null)
+        required_vcpu_minimum = optional(number,null)
+        required_vcpu_maximum = optional(number,null)
+        })
+    default = null
+    description = "Resource requirements object"
+    }
+
+
+variable "images" {
+  type = list(object({
+      image = set(object({
+        id   = string
+      }))
+  }))
+  default     = null
+  description = "Array of objects (Image object, containing the id of the image used to launch instances.)"
 }
