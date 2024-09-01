@@ -8,3 +8,8 @@ terraform {
     }
   }
 }
+
+provider "spotinst" {
+  token = "spotinst_token"
+  account = "spotinst_account"
+}
