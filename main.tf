@@ -1,3 +1,6 @@
+#Copyright © 2024 NetApp, Inc.
+#All rights reserved.
+
 #create an Elastigroup
 resource "spotinst_elastigroup_aws" "elastigroup" {
 
