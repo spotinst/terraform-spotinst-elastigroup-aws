@@ -3,24 +3,19 @@
 
 
 
-<a name="v0.3.0"></a>
-## [v0.3.0] (January 1, 0001)
+<a name="v0.1.0"></a>
+## v0.1.0 (September 1, 2024)
 
-
-
-<a name="v0.2.0"></a>
-## [v0.2.0] (February 13, 2021)
-
+- Added copyright notice ([#5](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/5))
+- Initial release of module with CodeDeploy Third-Party Integration Support ([#4](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/4))
+- [src] removed common workflow
+- [src] added common workflow
+- feat(elastigroup): additional arguments  ([#1](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/1))
+- docs(readme): re-generate documentation
+- docs(changelog): v0.2.0
 - feat: add support for terraform v0.14
 - docs(changelog): v0.1.0
-
-
-<a name="v0.1.0"></a>
-## v0.1.0 (November 24, 2020)
-
 - chore: initial commit
 
 
-[Unreleased]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.3.0...HEAD
-[v0.3.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.2.0...v0.3.0
-[v0.2.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.1.0...v0.2.0
+[Unreleased]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.1.0...HEAD
