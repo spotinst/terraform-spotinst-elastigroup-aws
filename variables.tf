@@ -295,12 +295,12 @@ variable "should_tag_amis" {
 variable "elastic_load_balancers" {
   type            = list(string)
   default         = null
-  description     = "The group name."
+  description     = "List of Elastic Load Balancers names."
 }
 variable "target_group_arns" {
   type            = list(string)
   default         = null
-  description     = "The group name."
+  description     = "List of Target Group ARNs to register the instances to."
 }
 
 variable "signal" {
@@ -523,29 +523,29 @@ variable "ephemeral_block_device" {
 }
 
 variable "persist_root_device" {
-  type        = string
+  type        = bool
   default     = null
-  description = "The group name."
+  description = "should the instance maintain its root device volumes."
 }
 variable "persist_block_devices" {
-  type        = string
+  type        = bool
   default     = null
-  description = "The group name."
+  description = "should the instance maintain its Data volumes."
 }
 variable "persist_private_ip" {
-  type        = string
+  type        = bool
   default     = null
-  description = "The group name."
+  description = "should the instance maintain its private IP."
 }
 variable "block_devices_mode" {
   type        = string
   default     = null
-  description = "The group name."
+  description = "Determine the way we attach the data volumes to the data devices."
 }
 variable "private_ips" {
-  type        = string
+  type        = list(string)
   default     = null
-  description = "The group name."
+  description = "List of Private IPs to associate to the group instances."
 }
 ##########
 
@@ -651,17 +651,17 @@ variable "integration_route53" {
 variable "should_resume_stateful" {
   type        = bool
   default     = null
-  description = "The group name."
+  description = "This will apply resuming action for Stateful instances in the Elastigroup upon scale up or capacity changes."
 }
 variable "should_roll" {
   type        = bool
   default     = null
-  description = "The group name."
+  description = "Sets the enablement of the roll option."
 }
 variable "auto_apply_tags" {
   type        = bool
   default     = null
-  description = "The group name."
+  description = "Enables updates to tags without rolling the group when set to true."
 }
 variable "roll_config" {
   type = object({
