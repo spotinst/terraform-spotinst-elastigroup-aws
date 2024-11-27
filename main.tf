@@ -23,6 +23,11 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   shutdown_script               = var.shutdown_script
   ebs_optimized                 = var.ebs_optimized
   placement_tenancy             = var.placement_tenancy
+  persist_root_device           = var.persist_root_device
+  persist_block_devices         = var.persist_block_devices
+  persist_private_ip            = var.persist_private_ip
+  block_devices_mode            = var.block_devices_mode
+  private_ips                   = var.private_ips
 
   dynamic "metadata_options" {
     for_each = (var.http_tokens != null && var.http_put_response_hop_limit != null) ? [1] : []
