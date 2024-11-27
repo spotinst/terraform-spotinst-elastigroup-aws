@@ -3,9 +3,16 @@
 
 
 
+<a name="v0.3.0"></a>
+## [v0.3.0] (November 27, 2024)
+
+- added persistence related fields in the configuration ([#9](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/9))
+
+
 <a name="v0.2.0"></a>
 ## [v0.2.0] (September 1, 2024)
 
+- Changelog v0.2.0 ([#8](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/8))
 - added versions file ([#7](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/7))
 
 
@@ -25,5 +32,6 @@
 - chore: initial commit
 
 
-[Unreleased]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.1.0...v0.2.0
