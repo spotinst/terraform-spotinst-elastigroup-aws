@@ -3,9 +3,16 @@
 
 
 
+<a name="v0.4.0"></a>
+## [v0.4.0] (March 24, 2025)
+
+- added `max_replacements_percentage` field in `strategy` object ([#11](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/11))
+
+
 <a name="v0.3.0"></a>
 ## [v0.3.0] (November 27, 2024)
 
+- Changelog Upgrade ([#10](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/10))
 - added persistence related fields in the configuration ([#9](https://github.com/spotinst/terraform-spotinst-elastigroup-aws/issues/9))
 
 
@@ -32,6 +39,7 @@
 - chore: initial commit
 
 
-[Unreleased]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/spotinst/terraform-spotinst-elastigroup-aws/compare/v0.1.0...v0.2.0
