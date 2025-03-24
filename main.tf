@@ -72,6 +72,7 @@ resource "spotinst_elastigroup_aws" "elastigroup" {
   immediate_od_recover_threshold = var.immediate_od_recover_threshold
   auto_healing                   = var.auto_healing
   restrict_single_az             = var.restrict_single_az
+  max_replacements_percentage    = var.max_replacements_percentage
 
   dynamic "scaling_strategy" {
     for_each = (var.terminate_at_end_of_billing_hour != null || var.termination_policy != null) ? [1] :[]
