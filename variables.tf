@@ -718,3 +718,9 @@ variable "images" {
   default     = null
   description = "Array of objects (Image object, containing the id of the image used to launch instances.)"
 }
+
+variable "max_replacements_percentage" {
+  type        = number
+  default     = null
+  description = "The percentage of active instances that can be replaced in parallel. This is used to prevent a large number of instances from being replaced at once."
+}

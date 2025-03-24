@@ -18,5 +18,6 @@ module "elastigroup-aws" {
   fallback_to_ondemand          = true
   health_check_grace_period     = 360
   orientation                   = "costOriented"
+  max_replacements_percentage   = 10
 
 }
